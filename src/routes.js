@@ -2,6 +2,7 @@ const { Router } = require('express');
 const AccountController = require('./controller/Account');
 const accountController = new AccountController({});
 const router = Router();
+const upload = require('./multer'); // Caminho para o arquivo multer.js
 
 /**
  * @swagger
@@ -52,7 +53,9 @@ router.get('/account', accountController.find.bind(accountController));
  *       201:
  *         description: Transação criada com sucesso
  */
-router.post('/account/transaction', accountController.createTransaction.bind(accountController));
+router.post('/account/transaction', upload.single('anexo'), accountController.createTransaction.bind(accountController));
+
+router.get('/account/transaction/:anexo', accountController.getAnexo.bind(accountController));
 
 /**
  * @swagger
@@ -96,7 +99,7 @@ router.post('/account/transaction', accountController.createTransaction.bind(acc
  *       500:
  *         description: Erro ao editar a transação
  */
-router.put('/account/transaction/:transactionId', accountController.editTransaction.bind(accountController));
+router.put('/account/transaction/:transactionId', upload.single('anexo'), accountController.editTransaction.bind(accountController));
 
 /**
  * @swagger
