@@ -1,24 +1,34 @@
 const DetailedAccountModel = require('../../models/DetailedAccount');
 
-const getTransaction = async ({
-                                filter, repository
-                              }) => {
+const getTransaction = async ({ filter, repository }) => {
   const mongoFilter = {};
 
-  if (filter.dateInitial && filter.dateFinal) {
-    mongoFilter.date = {
-      $gte: new Date(filter.dateInitial),
-      $lte: new Date(filter.dateFinal),
-    };
+  if (!!filter.dateInitial) {
+    mongoFilter.date = { ...mongoFilter.date, $gte: new Date(filter.dateInitial) };
+  }
+  if (!!filter.dateFinal) {
+    mongoFilter.date = { ...mongoFilter.date, $lte: new Date(filter.dateFinal) };
   }
 
   if (filter.accountId) mongoFilter.accountId = filter.accountId;
   if (filter.type) mongoFilter.type = filter.type;
-  if (filter.value) mongoFilter.value = filter.value;
-  if (filter.from) mongoFilter.from = { $regex: filter.from, $options: 'i' };
-  if (filter.to) mongoFilter.to = { $regex: filter.to, $options: 'i' };
+
+  if (!!filter.valueInitial) {
+    mongoFilter.value = { ...mongoFilter.value, $gte: filter.valueInitial };
+  }
+  if (!!filter.valueFinal) {
+    mongoFilter.value = { ...mongoFilter.value, $lte: filter.valueFinal };
+  }
+
+  if (filter.text) {
+    mongoFilter.$or = [
+      { from: { $regex: filter.text, $options: 'i' } },
+      { to: { $regex: filter.text, $options: 'i' } },
+    ];
+  }
+
   if (filter.anexo !== undefined) {
-    mongoFilter.anexo = { $ne: '' };
+    mongoFilter.anexo = filter.anexo ? { $ne: '' } : { $eq: '' };
   }
   const result = await repository.get(mongoFilter);
 

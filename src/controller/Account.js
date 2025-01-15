@@ -174,16 +174,16 @@ class AccountController {
   async getStatment(req, res) {
     const { getTransaction, transactionRepository } = this.di;
     const { accountId } = req.params;
-    const { type, value, dateInitial, dateFinal, from, to, anexo } = req.query;
+    const { type, valueInitial, valueFinal, dateInitial, dateFinal, text, anexo } = req.query;
 
     const filter = {
       accountId,
       type: type || '',
-      value: value ? Number(value) : 0,
+      valueInitial: valueInitial ? Number(valueInitial) : undefined,
+      valueFinal: valueFinal ? Number(valueFinal) : undefined,
       dateInitial: dateInitial || '',
       dateFinal: dateFinal || '',
-      from: from || '',
-      to: to || '',
+      text: text || '',
       anexo: anexo === 'true' ? true : anexo === 'false' ? false : undefined,
     };
 
@@ -193,8 +193,10 @@ class AccountController {
         message: 'Transações recuperadas com sucesso', result: { transactions },
       });
     } catch (error) {
+      console.error('Erro ao recuperar transações:', error);
       res.status(500).json({
-        message: 'Erro ao recuperar transações', error: error.message,
+        message: 'Erro ao recuperar transações',
+        error: error.message,
       });
     }
   }
