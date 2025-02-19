@@ -2,7 +2,7 @@ const { Router } = require('express')
 const AccountController = require('./controller/Account')
 const accountController = new AccountController({})
 const router = Router()
-
+console.log('exemplo de preview')
 /**
  * @swagger
  * /account:
