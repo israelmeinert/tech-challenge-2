@@ -1,0 +1,863 @@
+{
+	"info": {
+		"_postman_id": "a8ff3534-dad7-4b6f-a058-37a75f4bc3e7",
+		"name": "bytebank - api - tech-chalange",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3518806"
+	},
+	"item": [
+		{
+			"name": "health",
+			"item": [
+				{
+					"name": "health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "live",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/live",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"live"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "flow",
+			"item": [
+				{
+					"name": "01 - Criar usuários",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var { result } = jsonData;",
+									"    var {  id, email, password} = result;    ",
+									"",
+									"    pm.collectionVariables.set(\"user_id\", id);",
+									"    pm.collectionVariables.set(\"user_email\", email);",
+									"    pm.collectionVariables.set(\"user_password\", password);",
+									"",
+									"    var debug = {",
+									"        \"id\": pm.collectionVariables.get(\"user_id\"),",
+									"        \"email\": email,",
+									"        \"password\": password",
+									"    }",
+									"    ",
+									"    console.log(\"DEbug -->\", debug)",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$randomUserName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "02 - Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    var token = jsonData.result.token;",
+									"    pm.expect(token).to.not.be.null;",
+									"    pm.globals.set(\"bearer_token\", token);",
+									"    pm.collectionVariables.set(\"bearer_token\", token);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{user_email}}\",\r\n    \"password\": \"{{user_password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/auth",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03 - Buscar conta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var { result } = jsonData;",
+									"    var { account } = result; ",
+									"    var { id, userId } = account[0];",
+									"",
+									"    pm.collectionVariables.set(\"user_id\", userId);",
+									"    pm.collectionVariables.set(\"account_id\", id);",
+									"",
+									"",
+									"    var debug = {",
+									"        \"account_id\": id,",
+									"        \"user_id\": userId",
+									"    }",
+									"    ",
+									"    console.log(\"[account]: get user\", debug)",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "04 - Log variables",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"   ",
+									"    var debug = {",
+									"        user_id: pm.collectionVariables.get(\"user_id\"),",
+									"        account_id: pm.collectionVariables.get(\"account_id\"),",
+									"        base_url: pm.collectionVariables.get(\"base_url\"),",
+									"        transaction_id: pm.collectionVariables.get(\"transaction_id\"),",
+									"    }",
+									"    ",
+									"    console.log(\"[collectionVariables]: get variables\", debug)",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "transaction",
+			"item": [
+				{
+					"name": "Cria transação",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var { result } = jsonData;",
+									"    var {  id, accountId } = result;    ",
+									"",
+									"    pm.collectionVariables.set(\"transaction_id\", id);",
+									"    pm.collectionVariables.set(\"account_id\", accountId);",
+									"",
+									"    var debug = {",
+									"        \"user_id\": pm.collectionVariables.get(\"user_id\"),",
+									"        \"transaction_id\": id",
+									"    }",
+									"    ",
+									"    console.log(\"[Transaction]: Creating transaction Debug -->\", debug)",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"accountId\": \"{{account_id}}\",\r\n    \"value\": 400,\r\n    \"type\": \"Debit\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/account/transaction",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"transaction"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar transaction",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var { result } = jsonData;",
+									"    var {  id, accountId } = result;    ",
+									"",
+									"    pm.collectionVariables.set(\"transaction_id\", id);",
+									"    pm.collectionVariables.set(\"account_id\", accountId);",
+									"",
+									"    var debug = {",
+									"        \"user_id\": pm.collectionVariables.get(\"user_id\"),",
+									"        \"transaction_id\": id",
+									"    }",
+									"    ",
+									"    console.log(\"[Transaction]: Creating transaction Debug -->\", debug)",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"accountId\": \"{{account_id}}\",\r\n    \"value\": 200,\r\n    \"type\": \"Debit\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/account/:accountId/transaction/:transactionId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								":accountId",
+								"transaction",
+								":transactionId"
+							],
+							"variable": [
+								{
+									"key": "accountId",
+									"value": "688d632daf2e26d5451d9196"
+								},
+								{
+									"key": "transactionId",
+									"value": "688dae1b2bc8b33fc9209f49"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar : transaction",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"accountId\": \"688d632daf2e26d5451d9196\",\r\n    \"transactionId\": \"688d6351af2e26d5451d91a5\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/account/:accountId/transaction/:transactionId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								":accountId",
+								"transaction",
+								":transactionId"
+							],
+							"variable": [
+								{
+									"key": "accountId",
+									"value": "{{account_id}}"
+								},
+								{
+									"key": "transactionId",
+									"value": "{{transaction_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Busca extrato da conta",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account/{{account_id}}/statement",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account",
+								"{{account_id}}",
+								"statement"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "Criar usuários",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var { result } = jsonData;",
+									"    var {  id, email, password} = result;    ",
+									"",
+									"    pm.collectionVariables.set(\"user_id\", id);",
+									"    pm.collectionVariables.set(\"user_email\", email);",
+									"    pm.collectionVariables.set(\"user_password\", password);",
+									"",
+									"    var debug = {",
+									"        \"id\": pm.collectionVariables.get(\"user_id\"),",
+									"        \"email\": email,",
+									"        \"password\": password",
+									"    }",
+									"    ",
+									"    console.log(\"DEbug -->\", debug)",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$randomUserName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$randomUserName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"{{$randomPassword}}\",\r\n    \"id\": \"{{user_id}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar usuários",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "account",
+			"item": [
+				{
+					"name": "auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    var token = jsonData.result.token;",
+									"    pm.expect(token).to.not.be.null;",
+									"    pm.globals.set(\"bearer_token\", token);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{user_email}}\",\r\n    \"password\": \"{{user_password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/auth",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Conta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"",
+									"    var jsonData = pm.response.json();",
+									"    var { result } = jsonData;",
+									"    var { account } = result; ",
+									"    var { id, userId } = account[0];",
+									"",
+									"    pm.collectionVariables.set(\"user_id\", userId);",
+									"    pm.collectionVariables.set(\"account_id\", id);",
+									"",
+									"",
+									"    var debug = {",
+									"        \"account_id\": id,",
+									"        \"user_id\": userId",
+									"    }",
+									"    ",
+									"    console.log(\"[account]: get user\", debug)",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"account"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "docs",
+			"item": [
+				{
+					"name": "Swagger",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/docs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"docs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "password",
+			"value": ""
+		},
+		{
+			"key": "user_email",
+			"value": ""
+		},
+		{
+			"key": "user_password",
+			"value": ""
+		},
+		{
+			"key": "account_id",
+			"value": ""
+		},
+		{
+			"key": "bearer_token",
+			"value": ""
+		},
+		{
+			"key": "transaction_id",
+			"value": ""
+		}
+	]
+}

@@ -13,8 +13,13 @@ const get = async (account={}) => {
     return Account.find(account);
 };
 
+update = async (id, accountData) => {
+    return Account.findByIdAndUpdate(id, accountData, { new: true });
+};  
+
 module.exports = {
   create,
   getById,
-  get
+  get,
+  update,
 };
