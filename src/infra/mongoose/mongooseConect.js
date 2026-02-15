@@ -1,24 +1,23 @@
-const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const mongoose = require("mongoose");
+const { MongoMemoryServer } = require("mongodb-memory-server");
 
 async function connectDB() {
   try {
-    if (process.env.NODE_ENV === 'development' || !process.env.MONGO_URI) {
-      // Iniciar MongoDB em memória para desenvolvimento
+    if (process.env.NODE_ENV === "development" || !process.env.MONGO_URI) {
       const mongod = await MongoMemoryServer.create();
       const mongoUri = mongod.getUri();
       await mongoose.connect(mongoUri);
-      console.log('Conectado ao MongoDB em memória');
+      console.log("✅ Conectado ao MongoDB em memória (desenvolvimento)");
     } else {
-      // Conectar ao MongoDB real em produção
       await mongoose.connect(process.env.MONGO_URI, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
       });
-      console.log('Conectado ao MongoDB');
+      console.log("✅ Conectado ao MongoDB Atlas (produção)");
     }
   } catch (error) {
-    console.error('Erro ao conectar ao MongoDB:', error);
+    console.error("❌ Erro ao conectar ao MongoDB:", error);
+    process.exit(1);
   }
 }
 
